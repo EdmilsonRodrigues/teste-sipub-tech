@@ -1,0 +1,28 @@
+syntax = "proto3";
+package movies;
+
+option go_package = "./movies";
+
+service MovieService {
+  rpc GetMovies(GetMoviesRequest) returns (Movies);
+  rpc GetMovie(GetMovieRequest) returns (Movie);
+}
+
+message GetMoviesRequest {
+}
+
+message GetMovieRequest {
+  int32 id = 1;
+}
+
+message Movie {
+  int32 id = 1;
+  string title = 2;
+  string year = 3;
+}
+
+message Movies {
+  repeated Movie movies = 1;
+}
+
+
