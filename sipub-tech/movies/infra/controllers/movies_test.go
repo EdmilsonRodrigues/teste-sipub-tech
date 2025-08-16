@@ -1,0 +1,244 @@
+package controllers_test
+
+import (
+	"context"
+	"fmt"
+	"testing"
+	"testing/quick"
+
+	pb "github.com/EdmilsonRodrigues/teste-sipub-tech/sipub-tech/grpc/movies"
+	pb_exceptions "github.com/EdmilsonRodrigues/teste-sipub-tech/sipub-tech/grpc/exceptions"
+
+	"github.com/EdmilsonRodrigues/teste-sipub-tech/sipub-tech/movies/infra/controllers"
+	"github.com/EdmilsonRodrigues/teste-sipub-tech/sipub-tech/movies/core/domain"
+	"github.com/EdmilsonRodrigues/teste-sipub-tech/sipub-tech/movies/core/dtos"
+	"github.com/EdmilsonRodrigues/teste-sipub-tech/sipub-tech/movies/core/ports"
+)
+
+func TestGRPCMovieController(t *testing.T) {
+	controller := controllers.GRPCMovieController{}
+	ctx := context.Background()
+
+	const MaxId = int32(^uint32(0) >> 1)
+	const MinId = 1
+	t.Run("when executing GetMovie", func (t *testing.T) {
+		t.Run("should return movie pb.Movie when getting existing movie", func (t *testing.T) {
+			assertion := func(movie domain.Movie) bool {
+				if movie.ID < MinId || movie.ID > int(MaxId) {
+					return true
+				}
+				repo := &StubMovieOneGetter{
+					movieReturned: movie,
+				}
+				ctx := context.WithValue(ctx, controllers.RepoKey, repo)
+
+				result, err := controller.GetMovie(ctx, &pb.GetMovieRequest{Id: int32(movie.ID)})
+				if err != nil {
+					t.Logf("Error found when getting movie %v", err)
+					return false
+				}
+
+				expected := pb.Movie{
+					Id: int32(movie.ID),
+					Title: movie.Title,
+					Year: movie.Year,
+				}
+				
+				if expected.String() != result.String() {
+					t.Logf("Expected: %q different than Result: %q", expected.String(), result.String())
+					return false
+				}				
+				
+				return true
+			}
+			if err := quick.Check(assertion, nil); err != nil {
+				t.Errorf("Failed assertion: %v", err)
+			}
+		})
+
+		t.Run("should return pb_exceptions.MovieNotFoundException when getting a non existing movie", func (t *testing.T) {
+			assertion := func(id dtos.MovieID) bool {
+				repo := &StubMovieOneGetter{}
+				ctx := context.WithValue(ctx, controllers.RepoKey, repo)
+
+				_, err := controller.GetMovie(ctx, &pb.GetMovieRequest{Id: int32(id)})
+
+				if err == nil {
+					t.Logf("No error return when getting not existent movie.")
+					return false
+				}
+
+				if err != pb_exceptions.MovieNotFoundException {
+					t.Logf("Custom error returned intead of MovieNotFoundError")
+					return false
+				}
+				
+				return true
+			}
+			if err := quick.Check(assertion, nil); err != nil {
+				t.Errorf("Failed assertion: %v", err)
+			}
+		})
+
+		t.Run("should return custom error when receiving an error from the repository", func (t *testing.T) {
+			assertion := func(id int, errorMessage string) bool {
+				err := fmt.Errorf("random error: %s", errorMessage)
+				repo := &StubMovieOneGetter{
+					movieReturned: domain.Movie{ID: id},
+					errorReturned: err,
+				}
+				ctx := context.WithValue(ctx, controllers.RepoKey, repo)
+
+				_, receivedErr := controller.GetMovie(ctx, &pb.GetMovieRequest{Id: int32(id)})
+				if receivedErr == nil {
+					t.Logf("No error return when getting not existent movie.")
+					return false
+				}
+
+				if receivedErr == err {
+					t.Logf("Custom error not returned, same error returned instead.")
+					return false
+				}
+				
+				return true
+			}
+			if err := quick.Check(assertion, nil); err != nil {
+				t.Errorf("Failed assertion: %v", err)
+			}
+		})
+
+		t.Run("should return error if repository not set in context.", func(t *testing.T) {
+			assertion := func(id dtos.MovieID) bool {
+				_, err := controller.GetMovie(ctx, &pb.GetMovieRequest{Id: int32(id)})
+
+				if err == nil {
+					t.Logf("No error return when checking for repository.")
+					return false
+				}
+
+				if err != controllers.UnsetRespositoryError {
+					t.Logf("Did not return UnsetRepositoryError when repository was unset.")
+					return false
+				}
+				
+				return true
+			}
+			if err := quick.Check(assertion, nil); err != nil {
+				t.Errorf("Failed assertion: %v", err)
+			}
+
+		})
+
+	})
+
+	t.Run("when executing GetMovies", func(t *testing.T) {		
+		t.Run("should return array of movie response dtos", func (t *testing.T) {
+			assertion := func(movies []domain.Movie) bool {
+				repo := &StubMovieAllGetter{
+					moviesReturned: movies,
+				}
+				ctx := context.WithValue(ctx, controllers.RepoKey, repo)
+
+				results, err := controller.GetMovies(ctx, &pb.GetMoviesRequest{})
+				if err != nil {
+					t.Logf("Error found when getting movies %v", err)
+					return false
+				}
+
+				
+				for index, movie := range(movies) {
+					expected := &pb.Movie{
+						Id: int32(movie.ID),
+						Title: movie.Title,
+						Year: movie.Year,	
+					}
+					
+					if expected.String() != (*results.Movies[index]).String() {
+						t.Logf("Expected %q but got %q", expected.String(), (*results.Movies[index]).String())
+						return false
+					}
+				}
+
+				return true
+			}
+			if err := quick.Check(assertion, nil); err != nil {
+				t.Errorf("Failed assertion: %v", err)
+			}
+		})
+
+		t.Run("should return custom error when receiving an error from the repository", func (t *testing.T) {
+			assertion := func(id int, errorMessage string) bool {
+				err := fmt.Errorf("random error: %s", errorMessage)
+				repo := &StubMovieAllGetter{
+					errorReturned: err,
+				}
+				ctx := context.WithValue(ctx, controllers.RepoKey, repo)
+
+				_, receivedErr := controller.GetMovies(ctx, &pb.GetMoviesRequest{})
+				if receivedErr == nil {
+					t.Logf("No error return when getting not existent movie.")
+					return false
+				}
+
+				if receivedErr == err {
+					t.Logf("Custom error not returned, same error returned instead.")
+					return false
+				}
+				
+				return true
+			}
+			if err := quick.Check(assertion, nil); err != nil {
+				t.Errorf("Failed assertion: %v", err)
+			}
+		})
+
+		t.Run("should return error if repository not set in context.", func(t *testing.T) {
+			assertion := func(id dtos.MovieID) bool {
+				_, err := controller.GetMovies(ctx, &pb.GetMoviesRequest{})
+
+				if err == nil {
+					t.Logf("No error return when checking for repository.")
+					return false
+				}
+
+				if err != controllers.UnsetRespositoryError {
+					t.Logf("Did not return UnsetRepositoryError when repository was unset.")
+					return false
+				}
+				
+				return true
+			}
+			if err := quick.Check(assertion, nil); err != nil {
+				t.Errorf("Failed assertion: %v", err)
+			}
+
+		})
+	})
+}
+
+
+type StubMovieOneGetter struct {
+	movieReturned domain.Movie
+	errorReturned error
+}
+
+func (repo *StubMovieOneGetter) GetOne(id int) (domain.Movie, error) {
+	if id != repo.movieReturned.ID {
+		return repo.movieReturned, ports.MovieNotFoundError
+	}
+	return repo.movieReturned, repo.errorReturned
+}
+
+
+type StubMovieAllGetter struct {
+	moviesReturned []domain.Movie
+	errorReturned error
+}
+
+func (repo *StubMovieAllGetter) GetAll() ([]domain.Movie, error) {
+	return repo.moviesReturned, repo.errorReturned
+}
+
+
+
+
