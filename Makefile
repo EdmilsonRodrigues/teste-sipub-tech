@@ -3,4 +3,4 @@ PROTO-FILE=movies.proto
 
 .PHONY: update-proto
 update-proto:
-	protoc -I=${GRPC-DIR} --go_out=${GRPC-DIR} ${GRPC-DIR}/${PROTO-FILE}
+	protoc -I=${GRPC-DIR} --go-grpc_out=${GRPC-DIR} --go_out=${GRPC-DIR} ${GRPC-DIR}/${PROTO-FILE}
