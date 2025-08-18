@@ -18,13 +18,10 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v5
         with:
-          go-version: '1.24'
+          go-version-file: 'go.work'
           check-latest: true
           cache-dependency-path: |
-            sipub-tech/movies/go.sum
-            sipub-tech/messaging/go.sum
-            sipub-tech/grpc/go.sum
-            # sipub-tech/api/go.sum
+            ./sipub-tech/*/go.sum
             go.work.sum
 
       - name: Run tests
@@ -48,10 +45,7 @@ jobs:
           go-version: '1.24'
           check-latest: true
           cache-dependency-path: |
-            sipub-tech/movies/go.sum
-            sipub-tech/messaging/go.sum
-            sipub-tech/grpc/go.sum
-            # sipub-tech/api/go.sum
+            ./sipub-tech/*/go.sum
             go.work.sum
 
       - name: Run linter on module ${{ matrix.module }}
@@ -80,10 +74,7 @@ jobs:
           go-version: '1.24'
           check-latest: true
           cache-dependency-path: |
-            sipub-tech/movies/go.sum
-            sipub-tech/messaging/go.sum
-            sipub-tech/grpc/go.sum
-            # sipub-tech/api/go.sum
+            ./sipub-tech/*/go.sum
             go.work.sum
 
       - name: Build module ${{ matrix.module }}
