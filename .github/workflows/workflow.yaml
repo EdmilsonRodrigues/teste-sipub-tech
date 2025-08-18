@@ -81,7 +81,7 @@ jobs:
 
       - name: Build module ${{ matrix.module }}
         run: |
-          go build ./${{ matrix.module }}
+          go build ./${{ matrix.module }}/main.go
 
   deploy:
     if: false
