@@ -26,7 +26,8 @@ jobs:
 
       - name: Run tests
         run: |
-          go test ./${{ matrix.module }}/... -v
+          cd ${{ matrix.module }}
+          go test ./... -v
 
   lint:
     name: Run linter on module ${{ matrix.module }}
