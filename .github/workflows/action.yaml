@@ -1,6 +1,6 @@
 name: Run Continuous Integration and Continuous Deployment Workflows
 
-on: [push, pull-request]
+on: [push, pull_request]
 
 jobs:
   tests:
@@ -91,9 +91,9 @@ jobs:
         run: |
           go build ./${{ matrix.module }}
 
-  deploy:
+  push:
     if: false
-    name: Checks if module ${{ matrix.module }} can be built.
+    name: Push ${{ matrix.image }} to dockerhub.
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -116,6 +116,6 @@ jobs:
       - name: Build
         uses: docker/build-push-action@v6
         with:
-          context: ./sipub-tech/${{ image }}
+          context: ./sipub-tech/${{ matrix.image }}
           load: true
-          tags: ${{ vars.DOCKERHUB_USERNAME }}/sipub-tech-${{ image }}:latest
+          tags: ${{ vars.DOCKERHUB_USERNAME }}/sipub-tech-${{ matrix.image }}:latest
