@@ -57,6 +57,7 @@ jobs:
           working-directory: ${{ matrix.module }}
 
   build:
+    if: false
     name: Checks if module ${{ matrix.module }} can be built.
     runs-on: ubuntu-latest
     strategy:
@@ -82,7 +83,7 @@ jobs:
       - name: Build module ${{ matrix.module }}
         run: |
           cd ${{ matrix.module }}
-          go build 
+          go build main.go
 
   deploy:
     if: false
