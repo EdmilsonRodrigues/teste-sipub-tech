@@ -24,7 +24,7 @@ jobs:
             ./sipub-tech/*/go.sum
             go.work.sum
 
-      - name: Run tests
+      - name: Run tests on module ${{ matrix.module }}
         run: |
           cd ${{ matrix.module }}
           go test ./... -v
