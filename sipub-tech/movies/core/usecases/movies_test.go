@@ -58,8 +58,8 @@ func TestGetMovieCase(t *testing.T) {
 				return false
 			}
 
-			if err != ports.MovieNotFoundError {
-				t.Logf("Custom error returned intead of MovieNotFoundError")
+			if err != ports.ErrMovieNotFound {
+				t.Logf("Custom error returned intead of ErrMovieNotFound")
 				return false
 			}
 			
@@ -106,7 +106,7 @@ type StubMovieOneGetter struct {
 
 func (repo *StubMovieOneGetter) GetOne(id int) (domain.Movie, error) {
 	if id != repo.movieReturned.ID {
-		return repo.movieReturned, ports.MovieNotFoundError
+		return repo.movieReturned, ports.ErrMovieNotFound
 	}
 	return repo.movieReturned, repo.errorReturned
 }

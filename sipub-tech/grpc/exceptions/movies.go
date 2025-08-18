@@ -2,4 +2,4 @@ package exceptions
 
 import "fmt"
 
-var MovieNotFoundException = fmt.Errorf("Movie not found.")
+var ErrMovieNotFound = fmt.Errorf("movie not found")

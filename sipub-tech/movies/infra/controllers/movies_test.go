@@ -52,11 +52,11 @@ func TestGRPCMovieController(t *testing.T) {
 				return true
 			}
 			if err := quick.Check(assertion, nil); err != nil {
-				t.Errorf("Failed assertion: %v", err)
+				t.Errorf("failed assertion: %v", err)
 			}
 		})
 
-		t.Run("should return pb_exceptions.MovieNotFoundException when getting a non existing movie", func (t *testing.T) {
+		t.Run("should return pb_exceptions.ErrMovieNotFound when getting a non existing movie", func (t *testing.T) {
 			assertion := func(id dtos.MovieID) bool {
 				repo := &StubMovieOneGetter{}
 				ctx := context.WithValue(ctx, controllers.RepoKey, repo)
@@ -68,15 +68,15 @@ func TestGRPCMovieController(t *testing.T) {
 					return false
 				}
 
-				if err != pb_exceptions.MovieNotFoundException {
-					t.Logf("Custom error returned intead of MovieNotFoundError")
+				if err != pb_exceptions.ErrMovieNotFound {
+					t.Logf("Custom error returned intead of ErrMovieNotFound")
 					return false
 				}
 				
 				return true
 			}
 			if err := quick.Check(assertion, nil); err != nil {
-				t.Errorf("Failed assertion: %v", err)
+				t.Errorf("failed assertion: %v", err)
 			}
 		})
 
@@ -103,7 +103,7 @@ func TestGRPCMovieController(t *testing.T) {
 				return true
 			}
 			if err := quick.Check(assertion, nil); err != nil {
-				t.Errorf("Failed assertion: %v", err)
+				t.Errorf("failed assertion: %v", err)
 			}
 		})
 
@@ -116,15 +116,15 @@ func TestGRPCMovieController(t *testing.T) {
 					return false
 				}
 
-				if err != controllers.UnsetRespositoryError {
-					t.Logf("Did not return UnsetRepositoryError when repository was unset.")
+				if err != controllers.ErrUnsetRespository {
+					t.Logf("Did not return ErrUnsetRepository when repository was unset.")
 					return false
 				}
 				
 				return true
 			}
 			if err := quick.Check(assertion, nil); err != nil {
-				t.Errorf("Failed assertion: %v", err)
+				t.Errorf("failed assertion: %v", err)
 			}
 
 		})
@@ -162,7 +162,7 @@ func TestGRPCMovieController(t *testing.T) {
 				return true
 			}
 			if err := quick.Check(assertion, nil); err != nil {
-				t.Errorf("Failed assertion: %v", err)
+				t.Errorf("failed assertion: %v", err)
 			}
 		})
 
@@ -188,7 +188,7 @@ func TestGRPCMovieController(t *testing.T) {
 				return true
 			}
 			if err := quick.Check(assertion, nil); err != nil {
-				t.Errorf("Failed assertion: %v", err)
+				t.Errorf("failed assertion: %v", err)
 			}
 		})
 
@@ -201,15 +201,15 @@ func TestGRPCMovieController(t *testing.T) {
 					return false
 				}
 
-				if err != controllers.UnsetRespositoryError {
-					t.Logf("Did not return UnsetRepositoryError when repository was unset.")
+				if err != controllers.ErrUnsetRespository {
+					t.Logf("Did not return ErrUnsetRepository when repository was unset.")
 					return false
 				}
 				
 				return true
 			}
 			if err := quick.Check(assertion, nil); err != nil {
-				t.Errorf("Failed assertion: %v", err)
+				t.Errorf("failed assertion: %v", err)
 			}
 
 		})
@@ -224,7 +224,7 @@ type StubMovieOneGetter struct {
 
 func (repo *StubMovieOneGetter) GetOne(id int) (domain.Movie, error) {
 	if id != repo.movieReturned.ID {
-		return repo.movieReturned, ports.MovieNotFoundError
+		return repo.movieReturned, ports.ErrMovieNotFound
 	}
 	return repo.movieReturned, repo.errorReturned
 }
@@ -240,5 +240,127 @@ func (repo *StubMovieAllGetter) GetAll() ([]domain.Movie, error) {
 }
 
 
+func TestMessagingController(t *testing.T) {
+	controller := &controllers.MessagingMovieController{}
+	ctx := context.Background()
+
+	t.Run("when executing SaveMovie", func(t *testing.T) {
+		t.Run("should pass the movie to the usecase and return its error", func(t *testing.T) {
+			assertion := func(movie dtos.CreateMovieDTO, errString string) bool {
+				var err error
+				if errString != "" {
+					err = fmt.Errorf("an error: %s", errString)
+				}
+
+				repo := &MockMovieSaver{errorReturned: err}
+				ctx := context.WithValue(ctx, controllers.RepoKey, repo)
+
+				resultErr := controller.SaveMovie(ctx, movie)
+
+				if  (err == nil) != (resultErr == nil) {
+					t.Logf("Expected %v error found %v", err, resultErr)
+					return false
+				}
+				
+				return true
+				
+			}
+			if err := quick.Check(assertion, nil); err != nil {
+				t.Errorf("failed assertion: %v", err)
+			}
+		})
+		
+		t.Run("should return error if repository not set in context.", func(t *testing.T) {
+			assertion := func(movie dtos.CreateMovieDTO) bool {
+				err := controller.SaveMovie(ctx, movie)
+
+				if err == nil {
+					t.Logf("No error return when checking for repository.")
+					return false
+				}
+
+				if err != controllers.ErrUnsetRespository {
+					t.Logf("Did not return ErrUnsetRepository when repository was unset.")
+					return false
+				}
+				
+				return true
+			}
+			if err := quick.Check(assertion, nil); err != nil {
+				t.Errorf("failed assertion: %v", err)
+			}
+
+		})
+	})
+
+	t.Run("when executing DeleteMovie", func(t *testing.T) {
+		t.Run("should pass the movie id to the usecase and return its error", func(t *testing.T) {
+			assertion := func(id dtos.MovieID, errString string) bool {
+				var err error
+				if errString != "" {
+					err = fmt.Errorf("an error: %s", errString)
+				}
+
+				repo := &MockMovieDeleter{errorReturned: err}
+				ctx := context.WithValue(ctx, controllers.RepoKey, repo)
+
+				resultErr := controller.DeleteMovie(ctx, id)
+
+				if  (err == nil) != (resultErr == nil) {
+					t.Logf("Expected %v error found %v", err, resultErr)
+					return false
+				}
+				
+				return true
+			}
+			if err := quick.Check(assertion, nil); err != nil {
+				t.Errorf("failed assertion: %v", err)
+			}
+		})
+
+		t.Run("should return error if repository not set in context.", func(t *testing.T) {
+			assertion := func(id dtos.MovieID) bool {
+				err := controller.DeleteMovie(ctx, id)
+
+				if err == nil {
+					t.Logf("No error return when checking for repository.")
+					return false
+				}
+
+				if err != controllers.ErrUnsetRespository {
+					t.Logf("Did not return ErrUnsetRepository when repository was unset.")
+					return false
+				}
+				
+				return true
+			}
+			if err := quick.Check(assertion, nil); err != nil {
+				t.Errorf("failed assertion: %v", err)
+			}
+
+		})
+	})
+}
+
+type MockMovieSaver struct {
+	moviePassed domain.Movie
+	errorReturned error
+}
+
+func (repo *MockMovieSaver) Save(movie domain.Movie) error {
+	repo.moviePassed = movie
+	return repo.errorReturned
+}
+
+
+type MockMovieDeleter struct {
+	idPassed int
+	errorReturned error
+}
+
+func (repo *MockMovieDeleter) Delete(id int) error {
+	repo.idPassed = id
+	return repo.errorReturned
+}
 
 

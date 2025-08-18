@@ -12,12 +12,14 @@ import (
 	"github.com/EdmilsonRodrigues/teste-sipub-tech/sipub-tech/movies/core/usecases"
 )
 
+type ContextKey string
+
 const (
-	RepoKey = "repository"
+	RepoKey ContextKey = "repository"
 )
 
 var (
-	UnsetRespositoryError = fmt.Errorf("Repository not set in context or incomplete.")
+	ErrUnsetRespository = fmt.Errorf("repository not set in context or incomplete")
 )
 
 type GRPCMovieController struct {
@@ -27,13 +29,13 @@ type GRPCMovieController struct {
 func (controller *GRPCMovieController) GetMovie(ctx context.Context, req *pb.GetMovieRequest) (*pb.Movie, error) {
 	repo, ok := ctx.Value(RepoKey).(ports.MovieOneGetterRepository)
 	if !ok {
-		return nil, UnsetRespositoryError
+		return nil, ErrUnsetRespository
 	}
 	usecase := usecases.NewGetMovieCase(repo)
 
 	movie, err := usecase.GetMovie(dtos.MovieID(req.Id))
-	if err == ports.MovieNotFoundError {
-		return nil, pb_exceptions.MovieNotFoundException
+	if err == ports.ErrMovieNotFound {
+		return nil, pb_exceptions.ErrMovieNotFound
 	}
 
 	return controller.responseDtoToPbMovie(movie), err	
@@ -42,7 +44,7 @@ func (controller *GRPCMovieController) GetMovie(ctx context.Context, req *pb.Get
 func (controller *GRPCMovieController) GetMovies(ctx context.Context, req *pb.GetMoviesRequest) (*pb.Movies, error) {
 	repo, ok := ctx.Value(RepoKey).(ports.MovieAllGetterRepository)
 	if !ok {
-		return nil, UnsetRespositoryError
+		return nil, ErrUnsetRespository
 	}
 	usecase := usecases.NewGetMoviesCase(repo)
 
@@ -67,6 +69,30 @@ func (controller *GRPCMovieController) responseDtoToPbMovie(movie *dtos.MovieRes
 	}
 }
 
+type MessagingMovieController struct {
+
+}
+
+func (controler *MessagingMovieController) SaveMovie(ctx context.Context, movie dtos.CreateMovieDTO) error {
+	repo, ok := ctx.Value(RepoKey).(ports.MovieSaverRepository)
+	if !ok {
+		return ErrUnsetRespository
+	}
+	usecase := usecases.NewSaveMovieCase(repo)
+
+	return usecase.SaveMovie(movie)
+}
+
+
+func (controller *MessagingMovieController) DeleteMovie(ctx context.Context, id dtos.MovieID) error {
+	repo, ok := ctx.Value(RepoKey).(ports.MovieDeleterRepository)
+	if !ok {
+		return ErrUnsetRespository
+	}
+	usecase := usecases.NewDeleteMovieCase(repo)
+
+	return usecase.DeleteMovie(id)
+}
 
 
 

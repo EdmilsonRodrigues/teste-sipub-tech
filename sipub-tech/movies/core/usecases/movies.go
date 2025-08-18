@@ -20,10 +20,10 @@ type GetMovieCase struct {
 func (ucase *GetMovieCase) GetMovie(id dtos.MovieID) (*dtos.MovieResponseDTO, error) {
 	movie, err := ucase.repo.GetOne(int(id))
 	if err != nil {
-		if err == ports.MovieNotFoundError {
+		if err == ports.ErrMovieNotFound {
 			return nil, err
 		}
-		return nil, fmt.Errorf("Error getting movie: %w", err)
+		return nil, fmt.Errorf("error getting movie: %w", err)
 	}
 	return dtos.NewMovieResponseDTOFromDomain(movie), nil
 }
@@ -42,7 +42,7 @@ type GetMoviesCase struct {
 func (ucase *GetMoviesCase) GetMovies() (*[]dtos.MovieResponseDTO, error) {
 	movies, err := ucase.repo.GetAll()
 	if err != nil {
-		return nil, fmt.Errorf("Error getting movies %w", err)
+		return nil, fmt.Errorf("error getting movies %w", err)
 	}
 	return dtos.MoviesToResponseDTOs(movies), nil
 }
@@ -59,7 +59,7 @@ type SaveMovieCase struct {
 
 func (ucase *SaveMovieCase) SaveMovie(movie dtos.CreateMovieDTO) error {
 	if err := ucase.repo.Save(movie.ToDomain()); err != nil {
-		return fmt.Errorf("Error saving movie %w", err)
+		return fmt.Errorf("error saving movie %w", err)
 	}
 	return nil
 }
@@ -76,7 +76,7 @@ type DeleteMovieCase struct {
 
 func (ucase *DeleteMovieCase) DeleteMovie(id dtos.MovieID) error {
 	if err := ucase.repo.Delete(int(id)); err != nil {
-		return fmt.Errorf("Error deleting movie %w", err)
+		return fmt.Errorf("error deleting movie %w", err)
 	}
 	return nil
 }

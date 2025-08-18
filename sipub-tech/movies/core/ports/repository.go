@@ -14,7 +14,7 @@ type MovieRepository interface {
 }
 
 var (
-	MovieNotFoundError = fmt.Errorf("Movie not found in the repository.")
+	ErrMovieNotFound = fmt.Errorf("movie not found in the repository")
 )
 
 type MovieOneGetterRepository interface {
