@@ -2,7 +2,7 @@ module github.com/EdmilsonRodrigues/teste-sipub-tech/sipub-tech/movies
 
 go 1.24.4
 
-require github.com/EdmilsonRodrigues/teste-sipub-tech/sipub-tech/grpc v0.0.0-20250816184608-f3ddf0f06da6
+require github.com/EdmilsonRodrigues/teste-sipub-tech/sipub-tech/grpc v0.0.0-20250818073321-812351706f10
 
 require (
 	golang.org/x/net v0.40.0 // indirect
