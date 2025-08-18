@@ -28,8 +28,7 @@ jobs:
             go.work.sum
 
       - name: Run tests
-        run: |
-          go test ./${{ matrix.service }}/... -v
+        run: go test ./${{ matrix.service }}/... -v
 
   lint:
     name: Run linter on module ${{ matrix.module }}
