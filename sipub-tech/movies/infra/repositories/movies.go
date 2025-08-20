@@ -185,7 +185,7 @@ func (repo *MovieRepository) parseMovies(fetchedMovies []any) ([]domain.Movie, e
 	for index, movie := range fetchedMovies {
 		parsedMovie, ok := movie.(DBMovie)
 		if !ok {
-			return nil, fmt.Errorf("Failed parsing movie: %+v", movie)
+			return nil, fmt.Errorf("failed parsing movie: %+v", movie)
 		}
 		movies[index] = domain.Movie{
 			ID: parsedMovie.Id,

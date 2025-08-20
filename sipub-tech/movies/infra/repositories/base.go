@@ -95,9 +95,13 @@ func (repo *baseRepository) createAllTables(ctx context.Context) error {
 		return fmt.Errorf("failed creating id counter table: %w", err)
 	}
 
-	repo.waitTables(ctx)
+	if err := repo.waitTables(ctx); err != nil {
+		return fmt.Errorf("failed waiting for tables to be created: %w", err)
+	}
 
-	repo.createCurrentId(ctx)
+	if err := repo.createCurrentId(ctx); err != nil {
+		return fmt.Errorf("failed creating current id: %w", err)
+	}
 
 	return nil
 }
@@ -411,7 +415,7 @@ func (repo *baseRepository) genTableSecondaryIndex(gsi globalSecondaryIndex) typ
 func queryUnmarshaller[itemType any](response *dynamodb.QueryOutput) ([]any, error) {
 	var items []itemType
 	if err := attributevalue.UnmarshalListOfMaps(response.Items, &items); err != nil {
-		return nil, fmt.Errorf("couldn't unmarshal query response. Here's why: %v\n", err)
+		return nil, fmt.Errorf("couldn't unmarshal query response. Here's why: %v", err)
 	}
 	anyItems := make([]any, len(items))
 	for index, item := range items {
@@ -423,7 +427,7 @@ func queryUnmarshaller[itemType any](response *dynamodb.QueryOutput) ([]any, err
 func scanUnmarshaller[itemType any](response *dynamodb.ScanOutput) ([]any, error) {
 	var items []itemType
 	if err := attributevalue.UnmarshalListOfMaps(response.Items, &items); err != nil {
-		return nil, fmt.Errorf("couldn't unmarshal query response. Here's why: %v\n", err)
+		return nil, fmt.Errorf("couldn't unmarshal query response. Here's why: %v", err)
 	}
 	anyItems := make([]any, len(items))
 	for index, item := range items {

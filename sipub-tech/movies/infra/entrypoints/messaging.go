@@ -79,11 +79,11 @@ func (entrypoint *MessagingEntrypoint) parseCreateDtoMap(rawDto any) (*dtos.Crea
 
 	title, ok := dtoMap["title"]
 	if !ok {
-		return nil, fmt.Errorf("Raw DTO did not have title key")
+		return nil, fmt.Errorf("raw DTO did not have title key")
 	}
 	year, ok := dtoMap["year"]
 	if !ok {
-		return nil, fmt.Errorf("Raw DTO did not have year key")
+		return nil, fmt.Errorf("raw DTO did not have year key")
 	}
 	return &dtos.CreateMovieDTO{
 		Title: title.(string),
