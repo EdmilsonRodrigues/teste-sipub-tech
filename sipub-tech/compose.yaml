@@ -1,0 +1,45 @@
+services:
+  movies:
+    build:
+      context: ./movies/
+    restart: on-failure
+    environment:
+      MOVIE_SERVICE_AWS_REGION: "us-east-1"
+      MOVIE_SERVICE_DYNAMO_DB_ENDPOINT: localstack:4566
+      MOVIE_SERVICE_GRPC_LISTENING_PORT: 5000
+      MOVIE_SERVICE_RABBITMQ_CONNECTION_URL: amqp://guest:guest@rabbitmq:5672
+    ports:
+      - "5000:5000"
+
+    depends_on:
+      - localstack
+      - rabbitmq
+
+  localstack:
+    image: localstack/localstack
+    restart: always
+    ports:
+      - "127.0.0.1:4566:4566"            # LocalStack Gateway
+      - "127.0.0.1:4510-4559:4510-4559"  # external services port range
+    environment:
+      SERVICES: "dynamodb"
+    volumes:
+      - "${LOCALSTACK_VOLUME_DIR:-./volume}:/var/lib/localstack"
+      - "/var/run/docker.sock:/var/run/docker.sock"
+
+  rabbitmq:
+    image: rabbitmq:3
+    restart: always
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:15672"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    
+    
+  
+    
+  
