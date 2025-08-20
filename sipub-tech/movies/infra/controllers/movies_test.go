@@ -222,7 +222,7 @@ type StubMovieOneGetter struct {
 	errorReturned error
 }
 
-func (repo *StubMovieOneGetter) GetOne(id int) (domain.Movie, error) {
+func (repo *StubMovieOneGetter) GetOne(ctx context.Context, id int) (movie domain.Movie, err error) {
 	if id != repo.movieReturned.ID {
 		return repo.movieReturned, ports.ErrMovieNotFound
 	}
@@ -235,8 +235,10 @@ type StubMovieAllGetter struct {
 	errorReturned error
 }
 
-func (repo *StubMovieAllGetter) GetAll() ([]domain.Movie, error) {
-	return repo.moviesReturned, repo.errorReturned
+func (repo *StubMovieAllGetter) GetAll(
+	ctx context.Context, year string, limit int, lastMovieId int,
+) (movies []domain.Movie, cursor int, err error) {
+	return repo.moviesReturned, 0, repo.errorReturned
 }
 
 
@@ -347,7 +349,7 @@ type MockMovieSaver struct {
 	errorReturned error
 }
 
-func (repo *MockMovieSaver) Save(movie domain.Movie) error {
+func (repo *MockMovieSaver) Save(ctx context.Context, movie domain.Movie) error {
 	repo.moviePassed = movie
 	return repo.errorReturned
 }
@@ -358,7 +360,7 @@ type MockMovieDeleter struct {
 	errorReturned error
 }
 
-func (repo *MockMovieDeleter) Delete(id int) error {
+func (repo *MockMovieDeleter) Delete(ctx context.Context, id int) error {
 	repo.idPassed = id
 	return repo.errorReturned
 }

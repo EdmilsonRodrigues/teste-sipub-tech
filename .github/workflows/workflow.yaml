@@ -6,6 +6,8 @@ jobs:
   tests:
     name: Run tests on module ${{ matrix.module }}
     runs-on: ubuntu-latest
+    env:
+      # LOCALSTACK_AUTH_TOKEN=${{ secrets.LOCALSTACK_AUTH_TOKEN }}
     strategy:
       matrix:
         module:

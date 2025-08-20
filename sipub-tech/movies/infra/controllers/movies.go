@@ -33,7 +33,7 @@ func (controller *GRPCMovieController) GetMovie(ctx context.Context, req *pb.Get
 	}
 	usecase := usecases.NewGetMovieCase(repo)
 
-	movie, err := usecase.GetMovie(dtos.MovieID(req.Id))
+	movie, err := usecase.GetMovie(ctx, dtos.MovieID(req.Id))
 	if err == ports.ErrMovieNotFound {
 		return nil, pb_exceptions.ErrMovieNotFound
 	}
@@ -48,17 +48,23 @@ func (controller *GRPCMovieController) GetMovies(ctx context.Context, req *pb.Ge
 	}
 	usecase := usecases.NewGetMoviesCase(repo)
 
-	movies, err := usecase.GetMovies()
+	query := dtos.GetMoviesDTO{
+		Year: req.Year,
+		Limit: int(req.Limit),
+		Cursor: int(req.Cursor),
+	}
+
+	movies, cursor, err := usecase.GetMovies(ctx, query)
 	if err != nil {
 		return nil, err
 	}
 
 	parsedMovies := make([]*pb.Movie, len(*movies))
-
 	for index, movie := range(*movies) {
 		parsedMovies[index] = controller.responseDtoToPbMovie(&movie)
 	}
-	return &pb.Movies{Movies: parsedMovies}, err
+
+	return &pb.Movies{Movies: parsedMovies, Cursor: int32(cursor)}, err
 }
 
 func (controller *GRPCMovieController) responseDtoToPbMovie(movie *dtos.MovieResponseDTO) *pb.Movie {
@@ -80,7 +86,7 @@ func (controler *MessagingMovieController) SaveMovie(ctx context.Context, movie 
 	}
 	usecase := usecases.NewSaveMovieCase(repo)
 
-	return usecase.SaveMovie(movie)
+	return usecase.SaveMovie(ctx, movie)
 }
 
 
@@ -91,7 +97,7 @@ func (controller *MessagingMovieController) DeleteMovie(ctx context.Context, id 
 	}
 	usecase := usecases.NewDeleteMovieCase(repo)
 
-	return usecase.DeleteMovie(id)
+	return usecase.DeleteMovie(ctx, id)
 }
 
 

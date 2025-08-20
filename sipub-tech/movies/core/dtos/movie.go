@@ -11,8 +11,14 @@ func NewMovieID(id int) MovieID {
 type MovieID int
 
 type CreateMovieDTO struct {
-	Title string `json:"title"`
-	Year string `json:"year"`
+	Title string  `json:"title"`
+	Year string   `json:"year"`
+}
+
+type GetMoviesDTO struct {
+	Year string  `json:"year"`
+	Limit int    `json:"limit"`
+	Cursor int   `json:"cursor"`
 }
 
 func (dto *CreateMovieDTO) ToDomain() domain.Movie {
@@ -36,9 +42,9 @@ func MoviesToResponseDTOs(movies []domain.Movie) *[]MovieResponseDTO {
 }
 
 type MovieResponseDTO struct {
-	ID MovieID `json:"id"`
-	Title string `json:"title"`
-	Year string `json:"year"`
+	ID MovieID    `json:"id"`
+	Title string  `json:"title"`
+	Year string   `json:"year"`
 }
 
 func mapDomainToResponse(movie domain.Movie) MovieResponseDTO {

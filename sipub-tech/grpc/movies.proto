@@ -9,6 +9,9 @@ service MovieService {
 }
 
 message GetMoviesRequest {
+  string year = 1;
+  int32 limit = 2;
+  int32 cursor = 3;
 }
 
 message GetMovieRequest {
@@ -23,6 +26,7 @@ message Movie {
 
 message Movies {
   repeated Movie movies = 1;
+  int32 cursor = 2;
 }
 
 

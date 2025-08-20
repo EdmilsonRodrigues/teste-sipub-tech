@@ -1,12 +1,14 @@
 package ports
 
 import (
+	"context"
 	"fmt"
 	
 	"github.com/EdmilsonRodrigues/teste-sipub-tech/sipub-tech/movies/core/domain"
 )
 
 type MovieRepository interface {
+	TableCreatorRepository
 	MovieOneGetterRepository
 	MovieAllGetterRepository
 	MovieSaverRepository
@@ -17,18 +19,22 @@ var (
 	ErrMovieNotFound = fmt.Errorf("movie not found in the repository")
 )
 
+type TableCreatorRepository interface {
+	CreateTables(ctx context.Context) error
+}
+
 type MovieOneGetterRepository interface {
-	GetOne(id int) (domain.Movie, error)
+	GetOne(ctx context.Context, id int) (movie domain.Movie, err error)
 }
 
 type MovieAllGetterRepository interface {
-	GetAll() ([]domain.Movie, error)
+	GetAll(ctx context.Context, year string, limit int, lastMovieId int) (movies []domain.Movie, cursor int, err error)
 }
 
 type MovieSaverRepository interface {
-	Save(domain.Movie) error
+	Save(ctx context.Context, movie domain.Movie) error
 }
 
 type MovieDeleterRepository interface {
-	Delete(id int) error
+	Delete(ctx context.Context, id int) error
 }

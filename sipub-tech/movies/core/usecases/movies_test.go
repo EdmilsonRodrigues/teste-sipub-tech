@@ -1,6 +1,7 @@
 package usecases_test
 
 import (
+	"context"
 	"fmt"
 	"reflect"
 	"testing"
@@ -22,7 +23,7 @@ func TestGetMovieCase(t *testing.T) {
 			}
 			ucase := usecases.NewGetMovieCase(repo)
 
-			result, err := ucase.GetMovie(dtos.NewMovieID(movie.ID))
+			result, err := ucase.GetMovie(context.Background(), dtos.NewMovieID(movie.ID))
 			if err != nil {
 				t.Logf("Error found when getting movie %v", err)
 				return false
@@ -52,7 +53,7 @@ func TestGetMovieCase(t *testing.T) {
 			repo := &StubMovieOneGetter{}
 			ucase := usecases.NewGetMovieCase(repo)
 
-			_, err := ucase.GetMovie(dtos.NewMovieID(id))
+			_, err := ucase.GetMovie(context.Background(), dtos.NewMovieID(id))
 			if err == nil {
 				t.Logf("No error return when getting not existent movie.")
 				return false
@@ -79,7 +80,7 @@ func TestGetMovieCase(t *testing.T) {
 			}
 			ucase := usecases.NewGetMovieCase(repo)
 
-			_, receivedErr := ucase.GetMovie(dtos.NewMovieID(id))
+			_, receivedErr := ucase.GetMovie(context.Background(), dtos.NewMovieID(id))
 			if receivedErr == nil {
 				t.Logf("No error return when getting not existent movie.")
 				return false
@@ -104,7 +105,7 @@ type StubMovieOneGetter struct {
 	errorReturned error
 }
 
-func (repo *StubMovieOneGetter) GetOne(id int) (domain.Movie, error) {
+func (repo *StubMovieOneGetter) GetOne(ctx context.Context, id int) (movie domain.Movie, err error) {
 	if id != repo.movieReturned.ID {
 		return repo.movieReturned, ports.ErrMovieNotFound
 	}
@@ -114,13 +115,13 @@ func (repo *StubMovieOneGetter) GetOne(id int) (domain.Movie, error) {
 
 func TestGetMoviesCase(t *testing.T) {
 	t.Run("should return array of movie response dtos", func (t *testing.T) {
-		assertion := func(movies []domain.Movie) bool {
+		assertion := func(movies []domain.Movie, query dtos.GetMoviesDTO) bool {
 			repo := &StubMovieAllGetter{
 				moviesReturned: movies,
 			}
 			ucase := usecases.NewGetMoviesCase(repo)
 
-			results, err := ucase.GetMovies()
+			results, _, err := ucase.GetMovies(context.Background(), query)
 			if err != nil {
 				t.Logf("Error found when getting movies %v", err)
 				return false
@@ -148,14 +149,14 @@ func TestGetMoviesCase(t *testing.T) {
 	})
 
 	t.Run("should return custom error when receiving an error from the repository", func (t *testing.T) {
-		assertion := func(errorMessage string) bool {
+		assertion := func(errorMessage string, query dtos.GetMoviesDTO) bool {
 			err := fmt.Errorf("random error: %s", errorMessage)
 			repo := &StubMovieAllGetter{
 				errorReturned: err,
 			}
 			ucase := usecases.NewGetMoviesCase(repo)
 
-			_, receivedErr := ucase.GetMovies()
+			_, _, receivedErr := ucase.GetMovies(context.Background(), query)
 			if receivedErr == nil {
 				t.Logf("No error return when getting not existent movie.")
 				return false
@@ -180,8 +181,10 @@ type StubMovieAllGetter struct {
 	errorReturned error
 }
 
-func (repo *StubMovieAllGetter) GetAll() ([]domain.Movie, error) {
-	return repo.moviesReturned, repo.errorReturned
+func (repo *StubMovieAllGetter) GetAll(
+	ctx context.Context, year string, limit int, lastMovieId int,
+) (movies []domain.Movie, cursor int, err error) {
+	return repo.moviesReturned, 0, repo.errorReturned
 }
 
 
@@ -191,7 +194,7 @@ func TestSaveMovieCase(t *testing.T) {
 			repo := &MockMovieSaver{}
 			ucase := usecases.NewSaveMovieCase(repo)
 
-			if err := ucase.SaveMovie(movie); err != nil {
+			if err := ucase.SaveMovie(context.Background(), movie); err != nil {
 				t.Logf("Error found when saving movie %v", err)
 				return false
 			}
@@ -223,7 +226,7 @@ func TestSaveMovieCase(t *testing.T) {
 			}
 			ucase := usecases.NewSaveMovieCase(repo)
 
-			receivedErr := ucase.SaveMovie(movie)
+			receivedErr := ucase.SaveMovie(context.Background(), movie)
 			if receivedErr == nil {
 				t.Logf("No error return when getting not existent movie.")
 				return false
@@ -248,7 +251,7 @@ type MockMovieSaver struct {
 	errorReturned error
 }
 
-func (repo *MockMovieSaver) Save(movie domain.Movie) error {
+func (repo *MockMovieSaver) Save(ctx context.Context, movie domain.Movie) error {
 	repo.moviePassed = movie
 	return repo.errorReturned
 }
@@ -261,7 +264,7 @@ func TestDeleteMovieCase(t *testing.T) {
 			repo := &MockMovieDeleter{}
 			ucase := usecases.NewDeleteMovieCase(repo)
 
-			if err := ucase.DeleteMovie(id); err != nil {
+			if err := ucase.DeleteMovie(context.Background(), id); err != nil {
 				t.Logf("Error found when deleting movie %v", err)
 				return false
 			}
@@ -290,7 +293,7 @@ func TestDeleteMovieCase(t *testing.T) {
 			}
 			ucase := usecases.NewDeleteMovieCase(repo)
 
-			receivedErr := ucase.DeleteMovie(id)
+			receivedErr := ucase.DeleteMovie(context.Background(), id)
 			if receivedErr == nil {
 				t.Logf("No error return when getting not existent movie.")
 				return false
@@ -315,7 +318,7 @@ type MockMovieDeleter struct {
 	errorReturned error
 }
 
-func (repo *MockMovieDeleter) Delete(id int) error {
+func (repo *MockMovieDeleter) Delete(ctx context.Context, id int) error {
 	repo.idPassed = id
 	return repo.errorReturned
 }

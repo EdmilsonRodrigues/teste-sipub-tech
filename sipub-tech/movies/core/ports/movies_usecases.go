@@ -1,23 +1,24 @@
 package ports
 
 import (
+	"context"
 	"github.com/EdmilsonRodrigues/teste-sipub-tech/sipub-tech/movies/core/dtos"
 )
 
 type MovieGetter interface {
-	GetMovie(id dtos.MovieID) (*dtos.MovieResponseDTO, error)
+	GetMovie(ctx context.Context, id dtos.MovieID) (*dtos.MovieResponseDTO, error)
 }
 
 type MoviesGetter interface {
-	GetMovies() (*[]dtos.MovieResponseDTO, error)
+	GetMovies(ctx context.Context, query dtos.GetMoviesDTO) (movies *[]dtos.MovieResponseDTO, newCursor int, err error)
 }
 
 type MovieSaver interface {
-	SaveMovie(movie dtos.CreateMovieDTO) error
+	SaveMovie(ctx context.Context, movie dtos.CreateMovieDTO) error
 }
 
 type MovieDeleter interface {
-	DeleteMovie(id dtos.MovieID) error
+	DeleteMovie(ctx context.Context, id dtos.MovieID) error
 }
 
 
