@@ -1,4 +1,4 @@
-package server_test
+package rabbitmq_test
 
 import (
     "context"
