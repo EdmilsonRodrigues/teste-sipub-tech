@@ -3,7 +3,7 @@ module github.com/EdmilsonRodrigues/teste-sipub-tech/sipub-tech/movies
 go 1.24.4
 
 require (
-	github.com/EdmilsonRodrigues/teste-sipub-tech/sipub-tech/grpc v0.0.0-20250820085252-ca9ad97f0920
+	github.com/EdmilsonRodrigues/teste-sipub-tech/sipub-tech/grpc v0.0.0-20250820132528-d122cd7458a8
 	github.com/EdmilsonRodrigues/teste-sipub-tech/sipub-tech/messaging v0.0.0-20250820092011-73b4a63df80e
 	github.com/aws/aws-sdk-go-v2 v1.38.0
 	github.com/aws/aws-sdk-go-v2/config v1.31.0

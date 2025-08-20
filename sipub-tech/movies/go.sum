@@ -4,8 +4,8 @@ github.com/AdaLogics/go-fuzz-headers v0.0.0-20240806141605-e8a1dd7889d6 h1:He8af
 github.com/AdaLogics/go-fuzz-headers v0.0.0-20240806141605-e8a1dd7889d6/go.mod h1:8o94RPi1/7XTJvwPpRSzSUedZrtlirdB3r9Z20bi2f8=
 github.com/Azure/go-ansiterm v0.0.0-20210617225240-d185dfc1b5a1 h1:UQHMgLO+TxOElx5B5HZ4hJQsoJ/PvUvKRhJHDQXO8P8=
 github.com/Azure/go-ansiterm v0.0.0-20210617225240-d185dfc1b5a1/go.mod h1:xomTg63KZ2rFqZQzSB4Vz2SUXa1BpHTVz9L5PTmPC4E=
-github.com/EdmilsonRodrigues/teste-sipub-tech/sipub-tech/grpc v0.0.0-20250820085252-ca9ad97f0920 h1:dpmukPYpp6mTIFcrLDeSQt9aDwmCQTvXtfYfSHRc/UA=
-github.com/EdmilsonRodrigues/teste-sipub-tech/sipub-tech/grpc v0.0.0-20250820085252-ca9ad97f0920/go.mod h1:1JwW6FY3OuRCqho3aWtZe/uM/ewOEMgfvLCLjuRUixA=
+github.com/EdmilsonRodrigues/teste-sipub-tech/sipub-tech/grpc v0.0.0-20250820132528-d122cd7458a8 h1:ADqzM9UuA+/MSA1gGBn+WNExGfHk/KGDr3J31XhJnpo=
+github.com/EdmilsonRodrigues/teste-sipub-tech/sipub-tech/grpc v0.0.0-20250820132528-d122cd7458a8/go.mod h1:1JwW6FY3OuRCqho3aWtZe/uM/ewOEMgfvLCLjuRUixA=
 github.com/EdmilsonRodrigues/teste-sipub-tech/sipub-tech/messaging v0.0.0-20250820092011-73b4a63df80e h1:sACw6wCdHBrhuHFcdWDRnTkj4bRh03VV6ZNE2Ch/sKE=
 github.com/EdmilsonRodrigues/teste-sipub-tech/sipub-tech/messaging v0.0.0-20250820092011-73b4a63df80e/go.mod h1:tM9mi2yNy2KRYnKEA7ktlDNpmK7B3Mka3IOb36432Uo=
 github.com/Microsoft/go-winio v0.6.2 h1:F2VQgta7ecxGYO8k3ZZz3RS8fVIXVxONVUPlNERoyfY=
