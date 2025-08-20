@@ -182,7 +182,7 @@ func (rmqServer *RabbitMqServer) setQoS() {
 func (rmqServer *RabbitMqServer) registerConsumer(queue amqp.Queue, consumerConfig *ConsumerConfig) <-chan amqp.Delivery {
 	msgs, err := rmqServer.ch.Consume(
 		queue.Name, 
-		rmqServer.nodeId,     
+		fmt.Sprintf("%s-[%s]", rmqServer.nodeId, uuid.New().String()),     
 		consumerConfig.autoAcknowledge,  
 		consumerConfig.exclusive,
 		consumerConfig.noLocal,

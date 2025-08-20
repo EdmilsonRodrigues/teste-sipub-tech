@@ -9,8 +9,16 @@ import (
 
 type MovieRepository interface {
 	TableCreatorRepository
+	MovieQueryRepository
+	MovieExecuteRepository
+}
+
+type MovieQueryRepository interface {
 	MovieOneGetterRepository
 	MovieAllGetterRepository
+}
+
+type MovieExecuteRepository interface {
 	MovieSaverRepository
 	MovieDeleterRepository
 }

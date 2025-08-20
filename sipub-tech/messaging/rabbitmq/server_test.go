@@ -53,20 +53,20 @@ func TestRabbitMqServer(t *testing.T) {
 	nodeId := "teste"
 
 	t.Run("should open and close without errors", func(t *testing.T) {
-		rabbitmqServer := server.NewRabbitMqServer(connectionUrl, nodeId)
+		rabbitmqServer := rabbitmq.NewRabbitMqServer(connectionUrl, nodeId)
 		rabbitmqServer.Open()
 		rabbitmqServer.Close()
 	})
 
 	t.Run("should be able to send and listen to messages and add correlationId and metadata to context", func(t *testing.T) {
-		rabbitmqServer := server.NewRabbitMqServer(connectionUrl, nodeId)
+		rabbitmqServer := rabbitmq.NewRabbitMqServer(connectionUrl, nodeId)
 		receivedChan := make(chan bool, 10)
 		consumerFunction := func(ctx context.Context, body any) error {
-			_, ok := ctx.Value(server.MetadataKey).(dtos.MessageMetadata)
+			_, ok := ctx.Value(rabbitmq.MetadataKey).(dtos.MessageMetadata)
 			if !ok {
 				t.Error("metadata is not set.")
 			}
-			_, ok = ctx.Value(server.CorrelationIdKey).(string)
+			_, ok = ctx.Value(rabbitmq.CorrelationIdKey).(string)
 			if !ok {
 				t.Error("correlationId is not set.")
 			}

@@ -3,6 +3,7 @@ module github.com/EdmilsonRodrigues/teste-sipub-tech/sipub-tech/movies
 go 1.24.4
 
 require (
+	github.com/EdmilsonRodrigues/teste-sipub-tech/sipub-tech/grpc v0.0.0-20250820085252-ca9ad97f0920
 	github.com/aws/aws-sdk-go-v2 v1.38.0
 	github.com/aws/aws-sdk-go-v2/config v1.31.0
 	github.com/aws/aws-sdk-go-v2/feature/dynamodb/attributevalue v1.20.4
