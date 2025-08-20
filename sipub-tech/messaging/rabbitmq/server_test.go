@@ -12,8 +12,7 @@ import (
     "github.com/testcontainers/testcontainers-go/wait"
 
 	"github.com/EdmilsonRodrigues/teste-sipub-tech/sipub-tech/messaging/dtos"
-	"github.com/EdmilsonRodrigues/teste-sipub-tech/sipub-tech/messaging/server"
-
+	"github.com/EdmilsonRodrigues/teste-sipub-tech/sipub-tech/messaging/rabbitmq"
 )
 
 const (
