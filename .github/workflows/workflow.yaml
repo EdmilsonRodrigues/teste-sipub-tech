@@ -63,7 +63,7 @@ jobs:
       matrix:
         module:
           - sipub-tech/movies
-          # - sipub-tech/api
+          - sipub-tech/api
     needs:
       - tests
       - lint
@@ -85,14 +85,13 @@ jobs:
           go build main.go
 
   deploy:
-    if: false
-    name: Checks if module ${{ matrix.module }} can be built.
+    name: Deploy module ${{ matrix.module }} to dockerhub.
     runs-on: ubuntu-latest
     strategy:
       matrix:
         image:
           - movies
-          # - api
+          - api
     needs: build
     steps:
       - uses: actions/checkout@v4
