@@ -24,7 +24,7 @@ services:
     environment:
       SERVICES: "dynamodb"
     volumes:
-      - "${LOCALSTACK_VOLUME_DIR:-./volume}:/var/lib/localstack"
+      - "${LOCALSTACK_VOLUME_DIR:-/tmp/volume}:/var/lib/localstack"
       - "/var/run/docker.sock:/var/run/docker.sock"
 
   rabbitmq:
