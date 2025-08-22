@@ -1,0 +1,13 @@
+apiVersion: v2
+name: movies-api
+description: A simple application to manage movies.
+type: application
+version: 1.0.0
+appVersion: 1.0.0
+
+dependencies:
+
+- name: localstack
+  version: "0.6.24"
+  repository: "https://localstack.github.io/helm-charts"
+  alias: localstack-subchart

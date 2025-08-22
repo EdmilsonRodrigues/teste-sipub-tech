@@ -1,0 +1,100 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: api-gateway
+  labels:
+    {{- include "movies-api.labels" . | nindent 4 }}
+    app: api-gateway
+spec:
+  replicas: {{ .Values.api_gateway.replicaCount }}
+  selector:
+    matchLabels:
+      app: api-gateway
+  template:
+    metadata:
+      labels:
+        app: api-gateway
+    spec:
+      containers:
+        - name: api-gateway
+          image: {{ .Values.api_gateway.image }}
+          ports:
+            - containerPort:  {{ .Values.api_gateway.nodePort }}
+          env:
+            - name: API_GATEWAY_RABBITMQ_CONNECTION_URL
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.secret.name }}
+                  key: RABBITMQ_CONNECTION_URL
+            - name: API_GATEWAY_GRPC_CONNECTION_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ .Values.configMap.name }}
+                  key: GRPC_CONNECTION_URL
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: movies
+  labels:
+    {{- include "movies-api.labels" . | nindent 4 }}
+    app: movies
+spec:
+  replicas: {{ .Values.movies.replicaCount }}
+  selector:
+    matchLabels:
+      app: movies
+  template:
+    metadata:
+      labels:
+        app: movies
+    spec:
+      containers:
+        - name: movies
+          image: {{ .Values.movies.image }}
+          ports:
+            - containerPort: {{ .Values.movies.containerPort }}
+          env:
+            - name: MOVIE_SERVICE_AWS_REGION
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ .Values.configMap.name }}
+                  key: AWS_REGION
+
+            - name: MOVIE_SERVICE_DYNAMO_DB_ENDPOINT
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ .Values.configMap.name }}
+                  key: DYNAMO_DB_ENDPOINT
+                  
+            - name: MOVIE_SERVICE_GRPC_LISTENING_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ .Values.configMap.name }}
+                  key: GRPC_LISTENING_PORT
+                  
+            - name: MOVIE_SERVICE_RABBITMQ_CONNECTION_URL
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.secret.name }}
+                  key: RABBITMQ_CONNECTION_URL
+                  
+            - name: AWS_ACCESS_KEY_ID
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ .Values.configMap.name }}
+                  key: AWS_ACCESS_KEY_ID
+                  
+            - name: AWS_SECRET_ACCESS_KEY
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ .Values.configMap.name }}
+                  key: AWS_SECRET_ACCESS_KEY
+                  
+            - name: AWS_SESSION_TOKEN
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ .Values.configMap.name }}
+                  key: AWS_SESSION_TOKEN

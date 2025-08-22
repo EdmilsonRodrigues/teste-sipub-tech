@@ -1,0 +1,53 @@
+rabbitmq:
+  name: rabbitmq
+  username: "admin"
+  password: "admin"
+
+configMap:
+  name: config
+  dynamo_db: localstack-subchart    
+  data:
+    RABBITMQ_CONNECTION_URL: amqp://guest:guest@rabbitmq:5672
+    GRPC_CONNECTION_URL: movies:5000
+    AWS_REGION: "us-east-1"
+    GRPC_LISTENING_PORT: 5000
+    AWS_ACCESS_KEY_ID: "test"
+    AWS_SECRET_ACCESS_KEY: "test"
+    AWS_SESSION_TOKEN: "secret"
+    SERVICES: "dynamodb"
+
+api_gateway:
+  replicaCount: 2
+  image: edmilsonrodrigues/sipub-tech-api:latest
+  nodePort: 8080
+
+movies:
+  replicaCount: 2
+  image: edmilsonrodrigues/sipub-tech-movies:latest
+  containerPort: 5000
+    
+services:
+  - name: api-gateway
+    port: 8080
+    label: api-gateway
+    type: NodePort
+
+  - name: movies
+    port: 5000
+    label: movies
+    type: ClusterIP
+
+secret:
+  name: movies-api-secrets
+  rabbitmq_password: RABBITMQ_PASSWORD
+  rabbitmq_username: RABBITMQ_USERNAME
+
+rabbitmq_secret:
+  name: rabbitmq-secret
+  default_user_conf: ZGVmYXVsdF91c2VyID0gYWRtaW4KZGVmYXVsdF9wYXNzID0gYWRtaW4K
+  host: vault-default-user.default.svc
+  password: admin
+  port: "5672"
+  provider: rabbitmq
+  type: rabbitmq
+  username: admin
