@@ -6,7 +6,7 @@ O desafio consistia na criação de uma API que cumprisse os seguintes requisito
 - Usando Docker (Feito)
 - Usando Go (Feito)
 - Usando MongoDB (Substituído)
-- Documentação da Aplicação em Swagger ()
+- Documentação da Aplicação em Swagger (Feita - Incompleta)
 - Arquitetura Hexagonal (Feito)
 - Microsserviços (Feito)
 - Comunicação entre API e Movies via gRPC (Queries)
@@ -48,9 +48,9 @@ Filme:
 ```json
 {
     "data": {
-        "id": int,
-        "title": string,
-        "year": string,
+        "id": 1,
+        "title": "exemplo",
+        "year": "1990"
     }
 }
 ```
@@ -60,14 +60,14 @@ Filmes:
 {
     "data": [
         {
-            "id": int,
-            "title": string,
-            "year": string,
+            "id": 4,
+            "title": "exemplo 2",
+            "year": "1895"
         },
         ...
     ],
-    "limit": int,
-    "cursor": int,
+    "limit": 5,
+    "cursor": 3
 }
 ```
 
@@ -75,7 +75,7 @@ Erros:
 ```json
 {
     "details": {
-        "message": string,
+        "message": "Isso é um erro"
     }
 }
 ```
@@ -98,8 +98,8 @@ A requisição é processada em background, mas, mesmo que algo a impeça de ser
 ela volta para a fila até ser processada.
 ```json
 {
-    "title": string,
-    "year": string,
+    "title": "O labirinto do Fauno",
+    "year": "2006"
 }
 ```
 
@@ -111,6 +111,15 @@ ela volta para a fila até ser processada.
 
 
 ## Exemplos de uso via curl
+Para preencher automaticamente o repositório com os dados de input basta usar o comando:
+```bash
+make fill-db  # No caso de deploy com docker compose
+make fill-db DYNAMO_DB_ENDPOINT=http:IP:NODE_PORT_LOCALSTACK   # No caso de deploy com k8s, sendo o IP localhost para cluster microk8s
+                                                               # local e o IP da VM no caso de cluster isolado, e NODE_PORT_LOCALSTACK
+                                                               # é a porta do serviço NodePort do localstack que transmite para a 
+                                                               # porta 4566.
+```
+
 Para fazer requisições, primeiro deve-se pegar o IP e porta.
 - Se o deploy escolhido foi via docker, o IP é `localhost` e a porta é `8080`.
 - Se o deploy escolhido foi microk8s local, o IP é `localhost` e a porta é a NodePort do serviço de api-gateway.
@@ -143,4 +152,34 @@ Deletar filme:
 curl -X DELETE http://IP:PORT/movies/45  # deleta o filme com ID 45
 ```
 
+## Espaço para melhorias:
+### Documentação
+A documentação Swagger da aplicação necessita de muitas melhorias, que virão logo, em próximas versões do projeto.
+Lhe falta de essencial o corpo do método POST e o corpo das respostas, além de descrições mais detalhadas.
+Isso contudo, será adicionado futuramente ao projeto.
+
+### Indepotência
+Até o momento, o método POST pode criar uma cópia de um filme já cadastrado. Há porém a necessidade de se adicionar mais campos, 
+tendo em vista que é possível mais de um filme terem o mesmo nome e ano.
+
+
+### Observabilidade
+A aplicação não possui logs de forma satisfatória, e deve aumentar o número de logs para se ter melhor observablidade em produção.
+Além de logs, não há integração com tracers, nem com serviço de métricas, como Prometheus. 
+
+Em uma próxima versão será adicionado o suporte a observabilidade.
+
+### Health Checks
+Imagens Docker não possuem health checks, e tais health checks devem ser adicionados não somente nas imagens, mas também nos deploys,
+incluindo esperas, para que os pods não fiquem falhando enquanto esperam suas dependências subirem.
+
+
+Todas essas anotações foram observadas por mim e serão levadas em conta na próxima versão.
+
+### Importer
+O importer de dados do JSON não tem semáforos, então algumas goroutines podem acabar entrando em panico 
+e não sendo possível salvar todos os filmes. 
+
+Uma possível melhoria seria fazer um batch push de todos os movies e, caso não seja possível, adicionar um semáforo para impedir
+que seja ultrapassado o rate limit da API.
 

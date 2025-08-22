@@ -1,0 +1,38 @@
+paths:
+    /movies/:
+        get:
+            operationId: get_movies
+            parameters:
+                - in: query
+                  name: limit
+                  type: number
+                - description: the id of the last movie fetched, so it will be skipped.
+                  in: query
+                  name: cursor
+                  type: number
+                - description: the year of the movies to query from.
+                  in: query
+                  name: year
+                  type: number
+            summary: Get multiple movies from the repository.
+        post:
+            operationId: create_movie
+            summary: Create a movie in the repository. This operation runs on the background.
+    /movies/:id:
+        delete:
+            operationId: delete_movie
+            parameters:
+                - description: The id of the movie to fetch
+                  in: path
+                  name: id
+                  type: number
+            summary: Delete a movie by its id. This operation runs in the background.
+        get:
+            operationId: get_movie
+            parameters:
+                - description: The id of the movie to fetch
+                  in: path
+                  name: id
+                  type: number
+            summary: Get a movie from the repository by its id.
+swagger: "2.0"

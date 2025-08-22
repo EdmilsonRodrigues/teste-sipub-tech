@@ -10,6 +10,11 @@ IMAGE_PREFIX=edmilsonrodrigues/sipub-tech
 
 DEPLOY-DIR=./deploy
 
+FAKE_AWS_REGION = "us-east-1"
+JSON_PATH ?= data/movies.json
+DYNAMO_DB_ENDPOINT ?= http://localhost:4566
+
+
 .PHONY: update-proto
 update-proto:
 	for file in $(PROTO-FILES); do \
@@ -48,4 +53,7 @@ deploy-lxd:
 	cd deploy/k8s-local && \
 	./deploy.bash
 
+.PHONY: fill-db
+fill-db:
+	JSON_PATH=${JSON_PATH} DYNAMO_DB_ENDPOINT=${DYNAMO_DB_ENDPOINT} AWS_REGION=${FAKE_AWS_REGION} go run sipub-tech/movies/tools/importer.go
 

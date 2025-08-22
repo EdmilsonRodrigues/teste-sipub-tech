@@ -26,6 +26,19 @@ type MovieController struct {
 }
 
 
+
+// This route is responsible for getting one movie from the
+// repository by its ID.
+// It returns a JSONResponse with the Movie inside of it.
+//
+// swagger:route GET /movies/:id get_movie
+//  Get a movie from the repository by its id.
+//  Parameters:
+//    + name: id
+//      in: path
+//      type: number
+//      example: 14
+//      description: The id of the movie to fetch
 func (controller *MovieController) GetMovieHandler(usecase ports.GetMovieCase) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		service, ok := controller.getService(ctx)
@@ -60,6 +73,29 @@ func (controller *MovieController) GetMovieHandler(usecase ports.GetMovieCase) g
 }
 
 
+// This route is responsible for getting multiple movies from the
+// repository, possiblt filtering them by year, limiting, and skipping
+// all movies before the cursor.
+//
+// It returns a PaginatedJSONResponse with the Movie inside of it.
+//
+// swagger:route GET /movies/  get_movies
+//  Get multiple movies from the repository.
+//  Parameters:
+//      + name: limit
+//        type: number
+//        in: query
+//        example: 500
+//      + name: cursor
+//        type: number
+//        in: query
+//        example: 50
+//        description: the id of the last movie fetched, so it will be skipped.
+//      + name: year
+//        type: number
+//        in: query
+//        description: the year of the movies to query from.
+//        example: 1995
 func (controller *MovieController) GetMoviesHandler(usecase ports.GetMoviesCase) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		service, exists := controller.getService(ctx)
@@ -100,7 +136,16 @@ func (controller *MovieController) GetMoviesHandler(usecase ports.GetMoviesCase)
 	}
 }
 
-
+// This route is responsible for creating a movie in the
+// repository.
+// It is processed in the background
+// A CreateModelDTO should be passed in the JSON body
+//
+// It returns an empty body.
+//
+// swagger:route POST /movies/  create_movie
+//  Create a movie in the repository. This operation runs on the background.
+//  
 func (controller *MovieController) SaveMovieHandler(usecase ports.SaveMovieCase) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		service, exists := controller.getService(ctx)
@@ -131,6 +176,19 @@ func (controller *MovieController) SaveMovieHandler(usecase ports.SaveMovieCase)
 }
 
 
+// This route is responsible for deleting a movie from the repository by its id.
+// It is processed in the background
+//
+// It returns an empty body.
+//
+// swagger:route DELETE /movies/:id  delete_movie
+//  Delete a movie by its id. This operation runs in the background.
+//  Parameters:
+//    + name: id
+//      in: path
+//      type: number
+//      example: 14
+//      description: The id of the movie to fetch
 func (controller *MovieController) DeleteMovieHandler(usecase ports.DeleteMovieCase) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		service, exists := controller.getService(ctx)

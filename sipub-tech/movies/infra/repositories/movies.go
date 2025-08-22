@@ -112,12 +112,19 @@ func (repo *MovieRepository) Save(ctx context.Context, movie domain.Movie) error
 	if err != nil {
 		return fmt.Errorf("error getting the id of new movie %w", err)
 	}
-	
+
+	movie.ID = id
+
+	return repo.SaveWithId(ctx, movie)
+}
+
+func (repo *MovieRepository) SaveWithId(ctx context.Context, movie domain.Movie) error {
 	parsedMovie := DBMovie{
-		Id: id,
+		Id: movie.ID,
 		Title: movie.Title,
 		Year: movie.Year,
 	}
+
 	if err := repo.addItem(ctx, movieTableName, parsedMovie); err != nil {
 		return fmt.Errorf("failed saving movie %+v: %w", movie, err)
 	}
