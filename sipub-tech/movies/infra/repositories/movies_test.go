@@ -39,7 +39,7 @@ func TestMovieRepository(t *testing.T) {
         WaitingFor:   wait.ForLog("Ready."),
 		Env: map[string]string{
 			"SERVICES": "dynamodb",
-			//"LOCALSTACK_AUTH_TOKEN": os.Getenv("LOCALSTACK_AUTH_TOKEN"),
+			"LOCALSTACK_AUTH_TOKEN": os.Getenv("LOCALSTACK_AUTH_TOKEN"),
 		},
     }
     localStackC, err := testcontainers.GenericContainer(ctx, testcontainers.GenericContainerRequest{

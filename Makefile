@@ -35,11 +35,17 @@ build:
 	done
 
 .PHONY: deploy-docker
+deploy-docker:
+	cd sipub-tech && \
+	docker compose up --build
 
 .PHONY: deploy-microk8s
+	cd deploy/k8s-local && \
+	./setup.bash
 
-.PHONY: deploy-cluster-microk8s
-
-.PHONY: deploy-cluster-lxd
+.PHONY: deploy-lxd
+deploy-lxd:
+	cd deploy/k8s-local && \
+	./deploy.bash
 
 
