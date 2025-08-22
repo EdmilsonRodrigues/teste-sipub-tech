@@ -15,15 +15,13 @@ import (
 
 func NewGRPCEntrypoint(repo ports.MovieQueryRepository, listeningPort int) *GRPCEntrypoint {
 	return &GRPCEntrypoint{
-		repo: repo,
 		listeningPort: listeningPort,
-		controller: &controllers.GRPCMovieController{},
+		server: newGRPCServer(repo, &controllers.GRPCMovieController{}),
 	}
 }
 
 type GRPCEntrypoint struct {
-	repo ports.MovieQueryRepository
-	controller *controllers.GRPCMovieController
+	server *gRPCServer
 	listeningPort int
 }
 
@@ -36,7 +34,7 @@ func (entrypoint *GRPCEntrypoint) Serve(ctx context.Context) {
 
 	s := grpc.NewServer()
 
-	pb.RegisterMovieServiceServer(s, entrypoint.controller)
+	pb.RegisterMovieServiceServer(s, entrypoint.server)
 	log.Printf("Listening on port %d\n", entrypoint.listeningPort)
 	
 	if err := s.Serve(lis); err != nil {
@@ -45,5 +43,27 @@ func (entrypoint *GRPCEntrypoint) Serve(ctx context.Context) {
 	
 }
 
+func newGRPCServer(repo ports.MovieQueryRepository, controller *controllers.GRPCMovieController) *gRPCServer {
+	return &gRPCServer{
+		repo: repo,
+		controller: controller,
+	}
+}
 
+type gRPCServer struct {
+	pb.MovieServiceServer
+
+	repo ports.MovieQueryRepository
+	controller *controllers.GRPCMovieController	
+}
+
+func (server *gRPCServer) GetMovie(ctx context.Context, req *pb.GetMovieRequest) (*pb.Movie, error) {
+	ctx = context.WithValue(ctx, controllers.RepoKey, server.repo)
+	return server.controller.GetMovie(ctx, req)
+}
+
+func (server *gRPCServer) GetMovies(ctx context.Context, req *pb.GetMoviesRequest) (*pb.Movies, error) {
+	ctx = context.WithValue(ctx, controllers.RepoKey, server.repo)
+	return server.controller.GetMovies(ctx, req)
+} 
 

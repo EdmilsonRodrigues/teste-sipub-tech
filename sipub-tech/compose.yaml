@@ -1,13 +1,25 @@
 services:
+  api:
+    build:
+      context: ./api/
+    restart: on-failure
+    environment:
+      API_GATEWAY_RABBITMQ_CONNECTION_URL: amqp://guest:guest@rabbitmq:5672
+      API_GATEWAY_GRPC_CONNECTION_URL: movies:5000
+    ports:
+      - "8080:8080"
   movies:
     build:
       context: ./movies/
     restart: on-failure
     environment:
       MOVIE_SERVICE_AWS_REGION: "us-east-1"
-      MOVIE_SERVICE_DYNAMO_DB_ENDPOINT: localstack:4566
+      MOVIE_SERVICE_DYNAMO_DB_ENDPOINT: http://localstack:4566
       MOVIE_SERVICE_GRPC_LISTENING_PORT: 5000
       MOVIE_SERVICE_RABBITMQ_CONNECTION_URL: amqp://guest:guest@rabbitmq:5672
+      AWS_ACCESS_KEY_ID: "test"
+      AWS_SECRET_ACCESS_KEY: "test"
+      AWS_SESSION_TOKEN: "test"
     ports:
       - "5000:5000"
 
@@ -19,10 +31,11 @@ services:
     image: localstack/localstack
     restart: always
     ports:
-      - "127.0.0.1:4566:4566"            # LocalStack Gateway
-      - "127.0.0.1:4510-4559:4510-4559"  # external services port range
+      - "4566:4566"            # LocalStack Gateway
+      - "4510-4559:4510-4559"  # external services port range
     environment:
       SERVICES: "dynamodb"
+      LOCALSTACK_AUTH_TOKEN: "${LOCALSTACK_AUTH_TOKEN}"
     volumes:
       - "${LOCALSTACK_VOLUME_DIR:-/tmp/volume}:/var/lib/localstack"
       - "/var/run/docker.sock:/var/run/docker.sock"

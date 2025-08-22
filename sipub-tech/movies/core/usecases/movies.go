@@ -3,6 +3,7 @@ package usecases
 import (
 	"context"
 	"fmt"
+	"log"
 	
 	"github.com/EdmilsonRodrigues/teste-sipub-tech/sipub-tech/movies/core/ports"
 	"github.com/EdmilsonRodrigues/teste-sipub-tech/sipub-tech/movies/core/dtos"
@@ -21,6 +22,7 @@ type GetMovieCase struct {
 
 func (ucase *GetMovieCase) GetMovie(ctx context.Context, id dtos.MovieID) (*dtos.MovieResponseDTO, error) {
 	movie, err := ucase.repo.GetOne(ctx, int(id))
+	log.Printf("movie: %+v, err: %v", movie, err)
 	if err != nil {
 		if err == ports.ErrMovieNotFound {
 			return nil, err

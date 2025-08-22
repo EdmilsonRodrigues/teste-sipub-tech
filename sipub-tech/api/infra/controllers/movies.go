@@ -5,6 +5,7 @@ import (
 	"log"
 	"net/http"
 	"strconv"
+	"strings"
 	
 	"github.com/gin-gonic/gin"
 	
@@ -45,12 +46,12 @@ func (controller *MovieController) GetMovieHandler(usecase ports.GetMovieCase) g
 
 		movie, err := usecase.GetMovie(ctx, svc, dtos.MovieId(id))
 		if err != nil {
-			if err == ports.ErrMovieNotFound {
+			if strings.Contains(err.Error(), ports.ErrMovieNotFound.Error())  {
 				ctx.JSON(http.StatusNotFound, errors.MovieNotFoundErrorResponse)
 				ctx.Abort()
 				return
 			}
-			controller.internalServerError(ctx, "path broken.", fmt.Sprintf("Failed to fetch movy with id %d: %v", id, err))
+			controller.internalServerError(ctx, "path broken.", fmt.Sprintf("Failed to fetch movie with id %d: %v", id, err))
 			return
 		}
 

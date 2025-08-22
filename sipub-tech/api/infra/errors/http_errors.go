@@ -16,13 +16,13 @@ var (
 )
 
 func InternalServerError(message string) *dtos.ErrorResponse {
-	err := InternalServerErrorResponse
+	err := InternalServerErrorResponse.Copy()
 	err.Details.Message += ": " + message
 	return err
 }
 
 func UnprocessableEntity(message string) *dtos.ErrorResponse {
-	err := UnprocessableEntityResponse
+	err := UnprocessableEntityResponse.Copy()
 	err.Details.Message += ": " + message
 	return err
 }

@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"os"
 	"strconv"
 	
@@ -19,8 +20,12 @@ func main() {
 		panic("malformed grpc listening port configuration")
 	}
 	
-	repo := repositories.NewMovieRepository(repositories.NewRepositoryConfig(awsRegion, dynamoDBEndpoint))
 	ctx := context.Background()
+	repo := repositories.NewMovieRepository(repositories.NewRepositoryConfig(awsRegion, dynamoDBEndpoint))
+	repo.Open()
+	if err := repo.CreateTables(ctx); err != nil {
+		panic(fmt.Sprintf("Failed to create tables: %v", err))
+	}
 
 	grpcEntrypoint := entrypoints.NewGRPCEntrypoint(repo, listeningPort)
 	messagingEntrypoint := entrypoints.NewMessagingEntrypoint(repo, rabbitmqConnectionURL)

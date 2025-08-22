@@ -2,8 +2,10 @@ package repositories
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"log"
+	//"runtime"
 	"time"
 	
 	"github.com/aws/aws-sdk-go-v2/aws"
@@ -78,14 +80,13 @@ func (repo *baseRepository) Open() {
 
 	awsConfig, err := config.LoadDefaultConfig(context.TODO(),
 		config.WithRegion(repo.region),
+		config.WithBaseEndpoint(repo.endpoint),
 	)
 	if err != nil {
 		log.Fatalf("Cannot load the AWS configs: %s", err)
 	}
 
-	dynamodbClient = dynamodb.NewFromConfig(awsConfig, func(o *dynamodb.Options) {
-		o.BaseEndpoint = aws.String(repo.endpoint)
-	})
+	dynamodbClient = dynamodb.NewFromConfig(awsConfig)
 
 	repo.Open()
 }
@@ -200,7 +201,7 @@ func (repo *baseRepository) scanItems(
 			ExclusiveStartKey: cursor,
 		},
 	)
-	
+
 	if scanPaginator.HasMorePages() {
 		var response *dynamodb.ScanOutput
 		response, err = scanPaginator.NextPage(ctx)
@@ -229,7 +230,7 @@ func (repo *MovieRepository) deleteItem(
 		&dynamodb.DeleteItemInput{
 	TableName: aws.String(tableName),
 	Key: item.GetKey(),
-},
+		},
 	)
 	if err != nil {
 		return fmt.Errorf("couldn't delete %+v from table. Here's why: %w", item, err)
@@ -237,7 +238,7 @@ func (repo *MovieRepository) deleteItem(
 	return nil
 }
 
-func (repo *baseRepository) createTable(ctx context.Context, tableCfg *tableConfig) (*dynamodb.CreateTableOutput, error) {
+func (repo *baseRepository) createTable(ctx context.Context, tableCfg *tableConfig) (*dynamodb.CreateTableOutput, error) {	
 	attrDefs, keySchema := repo.genTablePrimaryIndex(tableCfg.TableAttributes)
 	globalSecondaryIndexes := repo.genTableSecondaryIndexes(tableCfg.GlobalSecondaryIndexes)
 	if len(globalSecondaryIndexes) == 0 {
@@ -254,6 +255,11 @@ func (repo *baseRepository) createTable(ctx context.Context, tableCfg *tableConf
 
 	table, err := repo.client.CreateTable(ctx, createTableInput)
 	if err != nil {
+		var alreadyExistsEx *types.ResourceInUseException
+		if errors.As(err, &alreadyExistsEx) {
+			log.Printf("Table %s already exists.\n", tableCfg.TableName)
+			return nil, nil
+		}
 		return nil, fmt.Errorf("couldn't create table %v with config %+v. Here's why: %w",
 			tableCfg.TableName,
 			createTableInput,
@@ -343,6 +349,10 @@ func (repo *baseRepository) waitTables(ctx context.Context) error {
 
 
 func (repo *baseRepository) addWaiter(tableName string, table *dynamodb.CreateTableOutput) {
+	if table == nil {
+		return
+	}
+
 	tableWaiter := func (ctx context.Context) error {
 		if err := repo.waiter.Wait(
 			ctx,

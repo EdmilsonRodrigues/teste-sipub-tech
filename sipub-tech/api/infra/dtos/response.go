@@ -24,6 +24,12 @@ type ErrorResponse struct {
 	Details ErrorDetails  `json:"details"`
 }
 
+func (err *ErrorResponse) Copy() *ErrorResponse {
+	return &ErrorResponse{
+		Details: err.Details,
+	}
+} 
+
 type ErrorDetails struct {
 	Message string  `json:"message"`
 }

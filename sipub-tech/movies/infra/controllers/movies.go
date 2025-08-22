@@ -68,6 +68,9 @@ func (controller *GRPCMovieController) GetMovies(ctx context.Context, req *pb.Ge
 }
 
 func (controller *GRPCMovieController) responseDtoToPbMovie(movie *dtos.MovieResponseDTO) *pb.Movie {
+	if movie == nil {
+		return nil
+	}
 	return &pb.Movie{
 		Id: int32(movie.ID),
 		Title: movie.Title,
